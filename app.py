@@ -58,8 +58,8 @@ def get_weather():
     else:
         return jsonify({"fulfillmentText": "Sorry, unable to fetch weather data."})
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(debug=True)
 
     
     # Check if the response is successful (status code 200)
