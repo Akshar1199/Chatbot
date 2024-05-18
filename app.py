@@ -7,6 +7,11 @@ API_KEY = 'e3ae4edf3f22b50bdd318e07154d65ca'
 
 app = Flask(__name__)
 
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({"message": "Hello, world!"})
+
+
 @app.route('/', methods=['POST'])
 def get_weather():
     # Get city and date_time from Dialogflow request
