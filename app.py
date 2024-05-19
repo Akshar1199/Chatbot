@@ -12,20 +12,44 @@ app = Flask(__name__)
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
+event_mapping = {
+    "sunrise": "sunrise",
+    "sunset": "sunset",
+    "moonrise": "moonrise",
+    "moonset": "moonset",
+    "moon up": "moonrise",
+    "moon down": "moonset",
+    "sun up": "sunrise",
+    "sun down": "sunset"
+}
+
 
 @app.route('/', methods=['POST'])
 def get_weather():
+    
     try:
     
-        # app.logger.debug('Received request: %s', request.get_json())
+        app.logger.debug('Received request: %s', request.get_json())
 
         request_data = request.get_json()
         city = request_data['queryResult']['parameters']['geo-city']
         date_time = request_data['queryResult']['parameters'].get('date-time', None)
-        temperature = request_data['queryResult']['parameters'].get('temperature', None)
-        print("temperature",temperature)
+        temperature = request_data['queryResult']['parameters'].get('get-temp', None)
+        weather = request_data['queryResult']['parameters'].get('get-weather', None)
+        sun_moon = request_data['queryResult']['parameters'].get('get-sun_moon', None)
+        humidity = request_data['queryResult']['parameters'].get('get-humidity', None)
+        rain_chance = request_data['queryResult']['parameters'].get('get-rain', None)
+        snow_chance = request_data['queryResult']['parameters'].get('get-snow', None)
 
         app.logger.debug('Date-time: %s', date_time)
+
+        if isinstance(date_time, list):
+            
+            if len(date_time) > 1:
+                date_time = date_time[1]
+            else:
+                date_time = date_time[0]
+        
 
         if not date_time:
             date_obj = datetime.date.today()
@@ -43,9 +67,11 @@ def get_weather():
         current_date = datetime.date.today()
         date_diff = (date_obj - current_date).days
         print(date_obj, "---", date_only)
+        formatted_date = date_obj.strftime("%d-%m-%Y")
+        print(date_obj, "---", date_only, "---", formatted_date)
 
-        if date_diff != 10:
-            date_diff += 1
+        if date_diff <= 8:
+            date_diff += 2
         print("currentdate", str(current_date) + " date_diff ", date_diff)
 
 
@@ -57,39 +83,82 @@ def get_weather():
             return jsonify({"fulfillmentText": "Requested date is not valid for weather forecast."}), 400
 
         print("url",url)
-        # Log the URL for weather API request
-        # app.logger.debug('Request URL: %s', url)
+        app.logger.debug('Request URL: %s', url)
 
-        # Fetch weather data from WeatherAPI
         response = requests.get(url)
         response_data = response.json()
+        app.logger.debug('API response: %s', response_data)
 
-        # Log the API response
-        # app.logger.debug('API response: %s', response_data)
 
         if 'error' not in response_data:
-            if date_diff > 14:
-                weather_description = response_data['forecast']['forecastday'][0]['day']['condition']['text']
-            else:
-                # Find the weather data for the specific requested date
-                forecast_days = response_data['forecast']['forecastday']
-                
-                # print(type(forecast_days[0]['date']))
-                # print("date_only",type(date_only))
-                weather_data = next((day for day in forecast_days if day['date'] == str(date_only)), None)
-                
-                if weather_data:
-                    weather_description = weather_data['day']['condition']['text']
-                else:
-                    return jsonify({"fulfillmentText": "Weather data for the requested date is not available."}), 400
+            response_text = ""
 
-            return jsonify({"fulfillmentText": f"The weather in {city} on {date_only} is {weather_description}."})
+            if date_diff > 14:
+                forecast_day = response_data['forecast']['forecastday'][0]
+                print("forecast_day",forecast_day)
+            else:
+                forecast_days = response_data['forecast']['forecastday']
+                forecast_day = next((day for day in forecast_days if day['date'] == str(date_only)), None)
+
+            if forecast_day:
+
+                if weather:
+                    weather_description = forecast_day['day']['condition']['text']
+                    response_text += f" Weather condition in {city} on {formatted_date} is {weather_description}."
+
+                if temperature is not None:
+                    temp_c = forecast_day['day']['maxtemp_c']
+                    temp_f = forecast_day['day']['maxtemp_f']
+                    avg_temp_c = forecast_day['day']['avgtemp_c']
+                    avg_temp_f = forecast_day['day']['avgtemp_f']
+                    response_text += f" The maximum temperature in {city} on {formatted_date} is {temp_c}°C ({temp_f}°F) and average temperature is {avg_temp_c}°C ({avg_temp_f}°F)."
+
+                if sun_moon:
+                    event_key = event_mapping.get(sun_moon.lower(), None)
+                    if event_key:
+                        event_time = forecast_day['astro'].get(event_key, "Not available")
+                        response_text += f" {sun_moon.capitalize()} time in {city} on {formatted_date} time is {event_time}."
+                    else:
+                        response_text += f" {sun_moon.capitalize()} is not a valid event."
+
+                if humidity:
+                    avg_humidity = forecast_day['day']['avghumidity']
+                    response_text += f" The average humidity in {city} on {formatted_date} is {avg_humidity}%."
+
+                if rain_chance:
+                    if forecast_day['day']['daily_chance_of_rain']:
+                        rain_chance = forecast_day['day']['daily_chance_of_rain']
+                        response_text += f" The chance of rain in {city} on {formatted_date} is {rain_chance}%."
+                    else:
+                        if 'hour' in forecast_day:
+                            hourly_data = forecast_day['hour']
+                            total_chance_of_rain = sum(hour.get('chance_of_rain', 0) for hour in hourly_data)
+                            rain_chance = total_chance_of_rain / len(hourly_data)
+                            response_text += f" The chance of rain in {city} on {formatted_date} is {rain_chance}%."
+
+                if snow_chance:
+                    if forecast_day['day']['daily_chance_of_rain']:
+                        snow_chance = forecast_day['day']['daily_chance_of_snow']
+                        response_text += f" The chance of rain in {city} on {formatted_date} is {snow_chance}%."
+                    else:
+                        if 'hour' in forecast_day:
+                            hourly_data = forecast_day['hour']
+                            total_chance_of_snow = sum(hour.get('chance_of_snow', 0) for hour in hourly_data)
+                            snow_chance = total_chance_of_snow / len(hourly_data)
+                            response_text += f" The chance of rain in {city} on {formatted_date} is {snow_chance}%."
+
+                return jsonify({"fulfillmentText": response_text})
+            
+            else:
+                return jsonify({"fulfillmentText": "Weather data for the requested date is not available."}), 400
+            
         else:
             return jsonify({"fulfillmentText": "Sorry, unable to fetch weather data."}), 500
 
     except Exception as e:
         app.logger.error('Error processing request: %s', e)
         return jsonify({"fulfillmentText": "An error occurred while processing the request."}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
