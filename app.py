@@ -75,12 +75,22 @@ def get_weather():
         print("currentdate", str(current_date) + " date_diff ", date_diff)
 
 
-        if date_diff > 14:
+        if 10 <= date_diff <= 14:
+            if date_diff in [10, 11]:
+                date_diff = 10
+                date_obj = current_date + datetime.timedelta(days=9)
+                print("new date",date_obj)
+                url = f"{BASE_FORECAST_URL}?key={API_KEY}&q={city}&days={date_diff}"
+            else:
+                date_obj = current_date + datetime.timedelta(days=15)
+                url = f"{BASE_FUTURE_URL}?key={API_KEY}&q={city}&dt={date_obj}"
+        elif date_diff > 14:
             url = f"{BASE_FUTURE_URL}?key={API_KEY}&q={city}&dt={date_obj}"
-        elif 0 <= date_diff <= 10:
+        elif 0 <= date_diff <= 9:
             url = f"{BASE_FORECAST_URL}?key={API_KEY}&q={city}&days={date_diff}"
-        elif date_diff == 10:
+        else:
             return jsonify({"fulfillmentText": "Requested date is not valid for weather forecast."}), 400
+        
 
         print("url",url)
         app.logger.debug('Request URL: %s', url)
@@ -93,13 +103,14 @@ def get_weather():
         if 'error' not in response_data:
             response_text = ""
 
-            if date_diff > 14:
+            if date_diff > 14 or (10 <= date_diff <= 14 and date_diff != 9):
                 forecast_day = response_data['forecast']['forecastday'][0]
-                print("forecast_day",forecast_day)
+                
             else:
                 forecast_days = response_data['forecast']['forecastday']
                 forecast_day = next((day for day in forecast_days if day['date'] == str(date_obj)), None)
 
+            print("forecast_day",forecast_day)
             if forecast_day:
 
                 if weather:
