@@ -44,7 +44,7 @@ def parse_date(date_str, query_text):
 def get_weather():
     
     try:
-        
+
         app.logger.debug('Received request: %s', request.get_json())
         request_data = request.get_json()
         query_text = request_data['queryResult']['queryText']
@@ -57,6 +57,7 @@ def get_weather():
         rain_chance = request_data['queryResult']['parameters'].get('get-rain', None)
         snow_chance = request_data['queryResult']['parameters'].get('get-snow', None)
 
+        print("temp",temperature)
         app.logger.debug('Date-time: %s', date_time)
 
         if isinstance(date_time, list) and len(date_time) == 0:
@@ -148,7 +149,7 @@ def get_weather():
                     weather_description = forecast_day['day']['condition']['text']
                     response_text += f" Weather condition in {city} on {formatted_date} is {weather_description}."
 
-                if temperature is not None:
+                if temperature:
                     temp_c = forecast_day['day']['maxtemp_c']
                     temp_f = forecast_day['day']['maxtemp_f']
                     avg_temp_c = forecast_day['day']['avgtemp_c']
@@ -157,20 +158,22 @@ def get_weather():
 
                 if sun_moon:
                     if isinstance(sun_moon, list):
-                        
-                        sun_moon_str = sun_moon[0]  # Assuming it's a list with a single element
-                    else:
-                        
+                        for event in sun_moon:
+                            event_key = event_mapping.get(event.lower(), None)
+                            if event_key:
+                                event_time = forecast_day['astro'].get(event_key, "Not available")
+                                response_text += f" {event.capitalize()} time in {city} on {formatted_date} is {event_time}."  
+                            else:
+                                response_text += f" {event.capitalize()} is not a valid event."             
+                    else:   
                         sun_moon_str = sun_moon.lower()
                         print(sun_moon_str)
-
-                    event_key = event_mapping.get(sun_moon_str, None)
-                    if event_key:
-                        event_time = forecast_day['astro'].get(event_key, "Not available")
-                        response_text += f" {sun_moon_str.capitalize()} time in {city} on {formatted_date} time is {event_time}."
-                    else:
-                        response_text += f" {sun_moon_str.capitalize()} is not a valid event."
-
+                        event_key = event_mapping.get(sun_moon_str, None)
+                        if event_key:
+                            event_time = forecast_day['astro'].get(event_key, "Not available")
+                            response_text += f" {sun_moon_str.capitalize()} time in {city} on {formatted_date} time is {event_time}."
+                        else:
+                            response_text += f" {sun_moon_str.capitalize()} is not a valid event."
 
                 if humidity:
                     avg_humidity = forecast_day['day']['avghumidity']
