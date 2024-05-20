@@ -171,7 +171,7 @@ def get_weather():
 
 
                 if snow_chance:
-                    if forecast_day['day']['daily_chance_of_rain']:
+                    if 'daily_chance_of_snow' in forecast_day['day'] in forecast_day['day']:
                         snow_chance = forecast_day['day']['daily_chance_of_snow']
                         response_text += f" The chance of rain in {city} on {formatted_date} is {snow_chance}%."
                     else:
