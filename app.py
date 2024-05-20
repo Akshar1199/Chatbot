@@ -2,10 +2,14 @@ from flask import Flask, request, jsonify
 import requests
 import datetime
 import logging
+import os
+from dotenv import load_dotenv
 
-BASE_FORECAST_URL = 'https://api.weatherapi.com/v1/forecast.json'
-BASE_FUTURE_URL = 'https://api.weatherapi.com/v1/future.json'
-API_KEY = 'bfefd949b5694fe2847201736241805'
+load_dotenv()
+
+BASE_FORECAST_URL = os.getenv('BASE_FORECAST_URL')
+BASE_FUTURE_URL = os.getenv('BASE_FUTURE_URL')
+API_KEY = os.getenv('API_KEY')
 
 app = Flask(__name__)
 
@@ -104,9 +108,12 @@ def get_weather():
         formatted_date = date_obj.strftime("%d-%m-%Y")
         print(date_obj, "---", date_only, "---", formatted_date)
 
-        if date_diff != 10:
+        current_time = datetime.datetime.now().time()
+        if datetime.time(0, 0) <= current_time <= datetime.time(5, 0) and date_diff <= 8:
+            date_diff += 2
+        elif date_diff != 10:
             date_diff += 1
-        print("currentdate", str(current_date) + " date_diff ", date_diff)
+        print("currentdate", str(current_date) + " date_diff: ", date_diff)
 
 
         if 10 <= date_diff <= 14:
