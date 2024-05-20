@@ -23,15 +23,31 @@ event_mapping = {
     "sun down": "sunset"
 }
 
+def parse_date(date_str, query_text):
+    try:
+        month_names = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
+        if any(month in query_text.lower() for month in month_names):
+            return datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+        
+        parts = date_str.split('-')
+        if len(parts) == 3:
+            if int(parts[2]) <= 12:
+                return datetime.datetime.strptime(date_str, "%Y-%d-%m").date()
+            else:
+                return datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError as e:
+        app.logger.error("Error parsing date: %s", e)
+        raise ValueError("Invalid date format")
+    
 
 @app.route('/', methods=['POST'])
 def get_weather():
     
     try:
-    
+        
         app.logger.debug('Received request: %s', request.get_json())
-
         request_data = request.get_json()
+        query_text = request_data['queryResult']['queryText']
         city = request_data['queryResult']['parameters']['geo-city']
         date_time = request_data['queryResult']['parameters'].get('date-time', None)
         temperature = request_data['queryResult']['parameters'].get('get-temp', None)
@@ -41,16 +57,7 @@ def get_weather():
         rain_chance = request_data['queryResult']['parameters'].get('get-rain', None)
         snow_chance = request_data['queryResult']['parameters'].get('get-snow', None)
 
-        # app.logger.debug('Date-time: %s', date_time)
-        print("city",city)
-        print("date_time",date_time)
-        print("temperature",temperature)
-        print("weather",weather)
-        print("sun_moon",sun_moon)
-        print("humidity",humidity)
-        print("rain_chance",rain_chance)
-        print("snow_chance",snow_chance)
-
+        app.logger.debug('Date-time: %s', date_time)
 
         if isinstance(date_time, list) and len(date_time) == 0:
             date_obj = datetime.date.today()
@@ -80,8 +87,8 @@ def get_weather():
                         date_time = date_time[0]
 
                 date_only = date_time.split('T')[0]
-                date_obj = datetime.datetime.strptime(date_only, "%Y-%m-%d").date()
-                print("ak",date_only,date_obj)
+                date_obj = parse_date(date_only, query_text)
+                print("kk",date_only,date_obj)
             except Exception as e:
                 app.logger.error("Error parsing date-time: %s", e)
                 return jsonify({"fulfillmentText": "Invalid date-time format"}), 400
@@ -153,8 +160,9 @@ def get_weather():
                         
                         sun_moon_str = sun_moon[0]  # Assuming it's a list with a single element
                     else:
-                        # sun_moon is already a string
+                        
                         sun_moon_str = sun_moon.lower()
+                        print(sun_moon_str)
 
                     event_key = event_mapping.get(sun_moon_str, None)
                     if event_key:
