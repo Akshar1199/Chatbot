@@ -41,7 +41,7 @@ def get_weather():
         rain_chance = request_data['queryResult']['parameters'].get('get-rain', None)
         snow_chance = request_data['queryResult']['parameters'].get('get-snow', None)
 
-        app.logger.debug('Date-time: %s', date_time)
+        # app.logger.debug('Date-time: %s', date_time)
 
         if isinstance(date_time, list) and len(date_time) == 0:
             date_obj = datetime.date.today()
@@ -55,8 +55,18 @@ def get_weather():
         
 
         if not date_time:
-            date_obj = datetime.date.today()
-            date_only = date_obj
+            if isinstance(date_time, list) and len(date_time) == 0:
+                date_obj = datetime.date.today()
+                date_only = date_obj
+                print("new date obj",date_obj)
+            elif isinstance(date_time, list):
+                
+                if len(date_time) > 1:
+                    date_time = date_time[1]
+                else:
+                    date_time = date_time[0]
+            # date_obj = datetime.date.today()
+            # date_only = date_obj
         else:
             try:
                 date_only = date_time.split('T')[0]
@@ -66,6 +76,7 @@ def get_weather():
                 app.logger.error("Error parsing date-time: %s", e)
                 return jsonify({"fulfillmentText": "Invalid date-time format"}), 400
 
+        app.logger.debug('Date-time: %s', date_time)
 
         current_date = datetime.date.today()
         date_diff = (date_obj - current_date).days
@@ -128,19 +139,27 @@ def get_weather():
                     response_text += f" The maximum temperature in {city} on {formatted_date} is {temp_c}°C ({temp_f}°F) and average temperature is {avg_temp_c}°C ({avg_temp_f}°F)."
 
                 if sun_moon:
-                    event_key = event_mapping.get(sun_moon.lower(), None)
+                    if isinstance(sun_moon, list):
+                        
+                        sun_moon_str = sun_moon[0]  # Assuming it's a list with a single element
+                    else:
+                        # sun_moon is already a string
+                        sun_moon_str = sun_moon.lower()
+
+                    event_key = event_mapping.get(sun_moon_str, None)
                     if event_key:
                         event_time = forecast_day['astro'].get(event_key, "Not available")
-                        response_text += f" {sun_moon.capitalize()} time in {city} on {formatted_date} time is {event_time}."
+                        response_text += f" {sun_moon_str.capitalize()} time in {city} on {formatted_date} time is {event_time}."
                     else:
-                        response_text += f" {sun_moon.capitalize()} is not a valid event."
+                        response_text += f" {sun_moon_str.capitalize()} is not a valid event."
+
 
                 if humidity:
                     avg_humidity = forecast_day['day']['avghumidity']
                     response_text += f" The average humidity in {city} on {formatted_date} is {avg_humidity}%."
 
                 if rain_chance:
-                    if forecast_day['day']['daily_chance_of_rain']:
+                    if 'daily_chance_of_rain' in forecast_day['day']:
                         rain_chance = forecast_day['day']['daily_chance_of_rain']
                         response_text += f" The chance of rain in {city} on {formatted_date} is {rain_chance}%."
                     else:
@@ -149,6 +168,7 @@ def get_weather():
                             total_chance_of_rain = sum(hour.get('chance_of_rain', 0) for hour in hourly_data)
                             rain_chance = total_chance_of_rain / len(hourly_data)
                             response_text += f" The chance of rain in {city} on {formatted_date} is {rain_chance}%."
+
 
                 if snow_chance:
                     if forecast_day['day']['daily_chance_of_rain']:
