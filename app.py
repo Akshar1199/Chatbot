@@ -43,7 +43,10 @@ def get_weather():
 
         app.logger.debug('Date-time: %s', date_time)
 
-        if isinstance(date_time, list):
+        if isinstance(date_time, list) and len(date_time) == 0:
+            date_obj = datetime.date.today()
+            date_only = date_obj
+        elif isinstance(date_time, list):
             
             if len(date_time) > 1:
                 date_time = date_time[1]
