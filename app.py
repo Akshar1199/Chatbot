@@ -42,6 +42,15 @@ def get_weather():
         snow_chance = request_data['queryResult']['parameters'].get('get-snow', None)
 
         # app.logger.debug('Date-time: %s', date_time)
+        print("city",city)
+        print("date_time",date_time)
+        print("temperature",temperature)
+        print("weather",weather)
+        print("sun_moon",sun_moon)
+        print("humidity",humidity)
+        print("rain_chance",rain_chance)
+        print("snow_chance",snow_chance)
+
 
         if isinstance(date_time, list) and len(date_time) == 0:
             date_obj = datetime.date.today()
@@ -53,22 +62,23 @@ def get_weather():
             else:
                 date_time = date_time[0]
         
-
+        
         if not date_time:
-            if isinstance(date_time, list) and len(date_time) == 0:
-                date_obj = datetime.date.today()
-                date_only = date_obj
-                print("new date obj",date_obj)
-            elif isinstance(date_time, list):
-                
-                if len(date_time) > 1:
-                    date_time = date_time[1]
-                else:
-                    date_time = date_time[0]
-            # date_obj = datetime.date.today()
-            # date_only = date_obj
+            date_obj = datetime.date.today()
+            date_only = date_obj
         else:
             try:
+                if isinstance(date_time, list) and len(date_time) == 0:
+                    date_obj = datetime.date.today()
+                    date_only = date_obj
+                    print("new date obj",date_obj)
+                elif isinstance(date_time, list):
+                    
+                    if len(date_time) > 1:
+                        date_time = date_time[1]
+                    else:
+                        date_time = date_time[0]
+
                 date_only = date_time.split('T')[0]
                 date_obj = datetime.datetime.strptime(date_only, "%Y-%m-%d").date()
                 print("ak",date_only,date_obj)
