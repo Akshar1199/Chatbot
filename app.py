@@ -70,8 +70,8 @@ def get_weather():
         formatted_date = date_obj.strftime("%d-%m-%Y")
         print(date_obj, "---", date_only, "---", formatted_date)
 
-        if date_diff <= 8:
-            date_diff += 2
+        if date_diff != 10:
+            date_diff += 1
         print("currentdate", str(current_date) + " date_diff ", date_diff)
 
 
@@ -98,7 +98,7 @@ def get_weather():
                 print("forecast_day",forecast_day)
             else:
                 forecast_days = response_data['forecast']['forecastday']
-                forecast_day = next((day for day in forecast_days if day['date'] == str(date_only)), None)
+                forecast_day = next((day for day in forecast_days if day['date'] == str(date_obj)), None)
 
             if forecast_day:
 
