@@ -200,7 +200,7 @@ def get_weather():
                             hourly_data = forecast_day['hour']
                             total_chance_of_snow = sum(hour.get('chance_of_snow', 0) for hour in hourly_data)
                             snow_chance = total_chance_of_snow / len(hourly_data)
-                            response_text += f" The chance of rain in {city} on {formatted_date} is {snow_chance}%."
+                            response_text += f" The chance of snow in {city} on {formatted_date} is {snow_chance}%."
 
                 return jsonify({"fulfillmentText": response_text})
             
