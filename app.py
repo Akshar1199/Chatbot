@@ -14,8 +14,10 @@ logging.basicConfig(level=logging.DEBUG)
 
 event_mapping = {
     "sunrise": "sunrise",
+    "sunshine": "sunrise",
     "sunset": "sunset",
     "moonrise": "moonrise",
+    "moonshine": "moonrise",
     "moonset": "moonset",
     "moon up": "moonrise",
     "moon down": "moonset",
@@ -147,14 +149,14 @@ def get_weather():
 
                 if weather:
                     weather_description = forecast_day['day']['condition']['text']
-                    response_text += f" Weather condition in {city} on {formatted_date} is {weather_description}."
+                    response_text += f" Weather condition is {weather_description},."
 
                 if temperature:
                     temp_c = forecast_day['day']['maxtemp_c']
                     temp_f = forecast_day['day']['maxtemp_f']
                     avg_temp_c = forecast_day['day']['avgtemp_c']
                     avg_temp_f = forecast_day['day']['avgtemp_f']
-                    response_text += f" The maximum temperature in {city} on {formatted_date} is {temp_c}°C ({temp_f}°F) and average temperature is {avg_temp_c}°C ({avg_temp_f}°F)."
+                    response_text += f" The maximum temperature is {temp_c}°C ({temp_f}°F) and average temperature is {avg_temp_c}°C ({avg_temp_f}°F),"
 
                 if sun_moon:
                     if isinstance(sun_moon, list):
@@ -162,45 +164,47 @@ def get_weather():
                             event_key = event_mapping.get(event.lower(), None)
                             if event_key:
                                 event_time = forecast_day['astro'].get(event_key, "Not available")
-                                response_text += f" {event.capitalize()} time in {city} on {formatted_date} is {event_time}."  
+                                response_text += f" {event.capitalize()} time is {event_time},"  
                             else:
-                                response_text += f" {event.capitalize()} is not a valid event."             
+                                response_text += f" {event.capitalize()} is not a valid event,"             
                     else:   
                         sun_moon_str = sun_moon.lower()
                         print(sun_moon_str)
                         event_key = event_mapping.get(sun_moon_str, None)
                         if event_key:
                             event_time = forecast_day['astro'].get(event_key, "Not available")
-                            response_text += f" {sun_moon_str.capitalize()} time in {city} on {formatted_date} time is {event_time}."
+                            response_text += f" {sun_moon_str.capitalize()} time time is {event_time},"
                         else:
                             response_text += f" {sun_moon_str.capitalize()} is not a valid event."
 
                 if humidity:
                     avg_humidity = forecast_day['day']['avghumidity']
-                    response_text += f" The average humidity in {city} on {formatted_date} is {avg_humidity}%."
+                    response_text += f" The average humidity is {avg_humidity}% ,"
 
                 if rain_chance:
                     if 'daily_chance_of_rain' in forecast_day['day']:
                         rain_chance = forecast_day['day']['daily_chance_of_rain']
-                        response_text += f" The chance of rain in {city} on {formatted_date} is {rain_chance}%."
+                        response_text += f" The chance of rain is {rain_chance}% ,"
                     else:
                         if 'hour' in forecast_day:
                             hourly_data = forecast_day['hour']
                             total_chance_of_rain = sum(hour.get('chance_of_rain', 0) for hour in hourly_data)
-                            rain_chance = total_chance_of_rain / len(hourly_data)
-                            response_text += f" The chance of rain in {city} on {formatted_date} is {rain_chance}%."
+                            rain_chance = round(total_chance_of_rain / len(hourly_data), 2)
+                            response_text += f" The chance of rain is {rain_chance}% ,"
 
 
                 if snow_chance:
                     if 'daily_chance_of_snow' in forecast_day['day'] in forecast_day['day']:
                         snow_chance = forecast_day['day']['daily_chance_of_snow']
-                        response_text += f" The chance of rain in {city} on {formatted_date} is {snow_chance}%."
+                        response_text += f" The chance of rain is {snow_chance}% ,"
                     else:
                         if 'hour' in forecast_day:
                             hourly_data = forecast_day['hour']
                             total_chance_of_snow = sum(hour.get('chance_of_snow', 0) for hour in hourly_data)
-                            snow_chance = total_chance_of_snow / len(hourly_data)
-                            response_text += f" The chance of snow in {city} on {formatted_date} is {snow_chance}%."
+                            snow_chance = (total_chance_of_snow / len(hourly_data), 2)
+                            response_text += f" The chance of snow is {snow_chance}% ,"
+
+                response_text += f" in {city} on {formatted_date}"
 
                 return jsonify({"fulfillmentText": response_text})
             
