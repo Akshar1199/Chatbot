@@ -149,7 +149,7 @@ def get_weather():
 
                 if weather:
                     weather_description = forecast_day['day']['condition']['text']
-                    response_text += f" Weather condition is {weather_description},."
+                    response_text += f"Weather condition is {weather_description},"
 
                 if temperature:
                     temp_c = forecast_day['day']['maxtemp_c']
@@ -179,30 +179,30 @@ def get_weather():
 
                 if humidity:
                     avg_humidity = forecast_day['day']['avghumidity']
-                    response_text += f" The average humidity is {avg_humidity}% ,"
+                    response_text += f" The average humidity is {avg_humidity}%,"
 
                 if rain_chance:
                     if 'daily_chance_of_rain' in forecast_day['day']:
                         rain_chance = forecast_day['day']['daily_chance_of_rain']
-                        response_text += f" The chance of rain is {rain_chance}% ,"
+                        response_text += f" The chance of rain is {rain_chance}%,"
                     else:
                         if 'hour' in forecast_day:
                             hourly_data = forecast_day['hour']
                             total_chance_of_rain = sum(hour.get('chance_of_rain', 0) for hour in hourly_data)
                             rain_chance = round(total_chance_of_rain / len(hourly_data), 2)
-                            response_text += f" The chance of rain is {rain_chance}% ,"
+                            response_text += f" The chance of rain is {rain_chance}%,"
 
 
                 if snow_chance:
                     if 'daily_chance_of_snow' in forecast_day['day'] in forecast_day['day']:
                         snow_chance = forecast_day['day']['daily_chance_of_snow']
-                        response_text += f" The chance of rain is {snow_chance}% ,"
+                        response_text += f" The chance of rain is {snow_chance}%,"
                     else:
                         if 'hour' in forecast_day:
                             hourly_data = forecast_day['hour']
                             total_chance_of_snow = sum(hour.get('chance_of_snow', 0) for hour in hourly_data)
                             snow_chance = (total_chance_of_snow / len(hourly_data), 2)
-                            response_text += f" The chance of snow is {snow_chance}% ,"
+                            response_text += f" The chance of snow is {snow_chance}%,"
 
                 response_text += f" in {city} on {formatted_date}"
 
