@@ -46,7 +46,7 @@ def parse_date(date_str, query_text):
         raise ValueError("Invalid date format")
     
 
-@app.route('/webhook', methods=['POST'])
+@app.route('/', methods=['POST'])
 def get_weather():
     
     print("keys: ")
