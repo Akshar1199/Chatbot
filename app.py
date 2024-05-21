@@ -105,13 +105,12 @@ def get_weather():
 
         current_date = datetime.date.today()
         date_diff = (date_obj - current_date).days
-        print(date_obj, "---", date_only)
         formatted_date = date_obj.strftime("%d-%m-%Y")
-        print(date_obj, "---", date_only, "---", formatted_date)
 
         current_time = datetime.datetime.now().time()
         if datetime.time(0, 0) <= current_time <= datetime.time(5, 0) and date_diff <= 8:
             date_diff += 2
+            date_obj = current_date + datetime.timedelta(days=1)
         elif date_diff != 10:
             date_diff += 1
         print("currentdate", str(current_date) + " date_diff: ", date_diff)
