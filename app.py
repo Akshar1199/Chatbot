@@ -76,7 +76,6 @@ def get_weather():
             else:
                 date_time = date_time[0]
         
-        
         if not date_time:
             date_obj = datetime.date.today()
             date_only = date_obj
