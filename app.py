@@ -152,7 +152,7 @@ def get_weather():
                 forecast_days = response_data['forecast']['forecastday']
                 forecast_day = next((day for day in forecast_days if day['date'] == str(date_obj)), None)
 
-            print("forecast_day",forecast_day)
+
             if forecast_day:
 
                 if weather:
