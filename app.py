@@ -107,7 +107,7 @@ def get_weather():
 
         app.logger.debug('Request URL: %s', url)
 
-        response = requests.get(url)
+        response = requests.get(url)    
         response_data = response.json()
         app.logger.debug('API response: %s', response_data)
 
