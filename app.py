@@ -37,7 +37,7 @@ def parse_date(date_str, query_text):
         
         month_names = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
 
-        cities = ["Umarpada"]
+        cities = ["umarpada"]
 
         parts = date_str.split('-') or date_str.split('/')
         print('datetime:', parts)
