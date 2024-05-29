@@ -31,16 +31,37 @@ event_mapping = {
 
 def parse_date(date_str, query_text):
     try:
+        print('hello')
+        print('date_str:', date_str)
+        print('query_text:', query_text)
+        
         month_names = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
+
+        cities = ["Umarpada"]
+
+        parts = date_str.split('-') or date_str.split('/')
+        print('datetime:', parts)
+
+        if any(city in query_text.lower() for city in cities):
+            if len(parts) == 3:
+                if int(parts[2]) <= 12:
+                    return datetime.datetime.strptime(date_str, "%Y-%d-%m").date()
+                else:
+                    return datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+        
         if any(month in query_text.lower() for month in month_names):
             return datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
         
-        parts = date_str.split('-')
+
         if len(parts) == 3:
             if int(parts[2]) <= 12:
                 return datetime.datetime.strptime(date_str, "%Y-%d-%m").date()
             else:
                 return datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+            
+        
+        
+
     except ValueError as e:
         app.logger.error("Error parsing date: %s", e)
         raise ValueError("Invalid date format")
@@ -73,7 +94,9 @@ def get_weather():
         else:
             try:
                 date_only = date_time.split('T')[0]
+                print('date_only:', date_only)
                 date_obj = parse_date(date_only, query_text)
+                print('date_obj', date_obj)
             except Exception as e:
                 app.logger.error("Error parsing date-time: %s", e)
                 return jsonify({"fulfillmentText": "Invalid date-time format"}), 400
