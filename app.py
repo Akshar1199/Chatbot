@@ -58,10 +58,8 @@ def parse_date(date_str, query_text):
                 return datetime.datetime.strptime(date_str, "%Y-%d-%m").date()
             else:
                 return datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
-            
-        
-        
-
+     
+     
     except ValueError as e:
         app.logger.error("Error parsing date: %s", e)
         raise ValueError("Invalid date format")
