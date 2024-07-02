@@ -67,6 +67,7 @@ def parse_date(date_str, query_text):
 
 @app.route('/hello', methods=['GET'])
 def hello():
+    print('hello')
     return "Hello, World!"
 
 @app.route('/', methods=['POST'])
