@@ -75,6 +75,7 @@ def get_weather():
     try:
         app.logger.debug('Received request: %s', request.get_json())
         request_data = request.get_json()
+        print('request_data:', request_data)
         query_text = request_data['queryResult']['queryText']
         city = request_data['queryResult']['parameters']['geo-city']
         date_time = request_data['queryResult']['parameters'].get('date-time', None)
