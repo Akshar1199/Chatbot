@@ -65,6 +65,10 @@ def parse_date(date_str, query_text):
         raise ValueError("Invalid date format")
 
 
+@app.route('/hello', methods=['GET'])
+def hello():
+    return "Hello, World!"
+
 @app.route('/', methods=['POST'])
 def get_weather():
     try:
